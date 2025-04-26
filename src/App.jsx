@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import { useState } from "react";
+import TodoList from "./components/TodoList";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [todos, setTodos] = useState([]);
+
+  const handleAddTodo = (formData) => {
+    if (formData.get("todo").length > 0) {
+      setTodos((prevTodos) => {
+        const maxId =
+          prevTodos.length > 0
+            ? Math.max(...prevTodos.map((todo) => todo.id))
+            : 0;
+        const newTodo = {
+          id: maxId + 1,
+          text: formData.get("todo"),
+          isCompleted: false,
+        };
+        return [...prevTodos, newTodo];
+      });
+    }
+  };
+
+  const handleRemoveTodo = (id) => {
+    setTodos((prevTodos) =>
+      prevTodos.filter((prevTodo) => {
+        return prevTodo.id !== id;
+      })
+    );
+  };
+
+  const handleFinishedTodo = (id) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((prevTodo) => {
+        if (prevTodo.id === id) {
+          return { ...prevTodo, isCompleted: !prevTodo.isCompleted };
+        } else {
+          return prevTodo;
+        }
+      })
+    );
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="todo-container">
+      <h1>Todo App</h1>
+      <form action={handleAddTodo}>
+        <input
+          autoComplete="off"
+          type="text"
+          name="todo"
+          id="todo"
+          placeholder="e.g. Do the dishes"
+        />
+        <button>Add Todo</button>
+      </form>
+      <TodoList
+        todos={todos}
+        handleRemove={handleRemoveTodo}
+        handleFinish={handleFinishedTodo}
+      />
+    </div>
+  );
 }
-
-export default App
